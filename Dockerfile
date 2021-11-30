@@ -20,7 +20,5 @@ RUN ls -ahl
 FROM alpine
 WORKDIR /usr/local/bin
 COPY --from=build /app/aws-load-balancer-drain-wait /usr/local/bin/aws-load-balancer-drain-wait
-RUN ls -ahl
-RUN cat /etc/group
 USER nobody
 CMD ["aws-load-balancer-drain-wait"]
