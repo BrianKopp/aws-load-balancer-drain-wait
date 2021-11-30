@@ -3,6 +3,7 @@ module github.com/briankopp/aws-load-balancer-drain-wait
 go 1.17
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.11.1
 	github.com/aws/aws-sdk-go-v2/config v1.10.2
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.12.1
 	k8s.io/apimachinery v0.22.4
@@ -10,7 +11,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.11.1 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.2 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.1 // indirect
