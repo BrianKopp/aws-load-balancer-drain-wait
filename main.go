@@ -48,10 +48,18 @@ func main() {
 	// get the load balancer from aws
 	var awsConfig aws.Config
 	if appConfig.AWSProfile != "" {
-		awsConfig, err = config.LoadDefaultConfig(context.Background(), config.WithSharedConfigProfile(appConfig.AWSProfile))
+		log.Printf("Using AWS Profile %v", appConfig.AWSProfile)
+		awsConfig, err = config.LoadDefaultConfig(context.Background(),
+			config.WithSharedConfigProfile(appConfig.AWSProfile),
+			config.WithRegion(appConfig.AWSRegion),
+			config.WithSharedConfigFiles(config.DefaultSharedConfigFiles),
+			config.WithSharedCredentialsFiles(config.DefaultSharedCredentialsFiles))
 	} else if appConfig.AWSRegion != "" {
-		awsConfig, err = config.LoadDefaultConfig(context.Background(), config.WithRegion(appConfig.AWSRegion))
+		log.Printf("Using AWS Region %v", appConfig.AWSRegion)
+		awsConfig, err = config.LoadDefaultConfig(context.Background(),
+			config.WithRegion(appConfig.AWSRegion))
 	} else {
+		log.Printf("Using default aws config")
 		awsConfig, err = config.LoadDefaultConfig(context.Background())
 	}
 	if err != nil {

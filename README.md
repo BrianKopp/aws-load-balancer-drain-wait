@@ -28,4 +28,6 @@ in the `deploy` folder.
 
 ## Testing Locally
 
-TODO
+```sh
+go run . --aws-profile default --aws-region us-east-1 --kubeconfig ~/.kube/config
+```
