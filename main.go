@@ -25,52 +25,12 @@ import (
 )
 
 func main() {
-	log.Print("Starting golang server\n")
+	log.Println("Starting golang server")
 	appConfig := buildConfigFromFlags()
 
-	// setup clients
-	var k8sConfig *rest.Config
-	var err error
-	if appConfig.KubeConfigFile != "" {
-		k8sConfig, err = clientcmd.BuildConfigFromFlags("", appConfig.KubeConfigFile)
-	} else {
-		k8sConfig, err = rest.InClusterConfig()
-	}
+	drainClient, err := buildDrainClientFromConfig(appConfig)
 	if err != nil {
 		exitWithError(err)
-	}
-
-	k8sClientSet, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		exitWithError(err)
-	}
-
-	// get the load balancer from aws
-	var awsConfig aws.Config
-	if appConfig.AWSProfile != "" {
-		log.Printf("Using AWS Profile %v", appConfig.AWSProfile)
-		awsConfig, err = config.LoadDefaultConfig(context.Background(),
-			config.WithSharedConfigProfile(appConfig.AWSProfile),
-			config.WithRegion(appConfig.AWSRegion),
-			config.WithSharedConfigFiles(config.DefaultSharedConfigFiles),
-			config.WithSharedCredentialsFiles(config.DefaultSharedCredentialsFiles))
-	} else if appConfig.AWSRegion != "" {
-		log.Printf("Using AWS Region %v", appConfig.AWSRegion)
-		awsConfig, err = config.LoadDefaultConfig(context.Background(),
-			config.WithRegion(appConfig.AWSRegion))
-	} else {
-		log.Printf("Using default aws config")
-		awsConfig, err = config.LoadDefaultConfig(context.Background())
-	}
-	if err != nil {
-		exitWithError(err)
-	}
-
-	elbClient := elbv2.NewFromConfig(awsConfig)
-
-	drainClient := &DrainDelayClient{
-		elbv2Client: elbClient,
-		k8sClient:   k8sClientSet,
 	}
 
 	// create HTTP server
@@ -159,6 +119,55 @@ type DelayConfig struct {
 type DrainDelayClient struct {
 	elbv2Client *elbv2.Client
 	k8sClient   *kubernetes.Clientset
+}
+
+func buildDrainClientFromConfig(appConfig AppConfig) (*DrainDelayClient, error) {
+	// setup clients
+	var k8sConfig *rest.Config
+	var err error
+	if appConfig.KubeConfigFile != "" {
+		k8sConfig, err = clientcmd.BuildConfigFromFlags("", appConfig.KubeConfigFile)
+	} else {
+		k8sConfig, err = rest.InClusterConfig()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	k8sClientSet, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// get the load balancer client from aws
+	var awsConfig aws.Config
+	if appConfig.AWSProfile != "" {
+		log.Printf("Using AWS Profile %v", appConfig.AWSProfile)
+		awsConfig, err = config.LoadDefaultConfig(context.Background(),
+			config.WithSharedConfigProfile(appConfig.AWSProfile),
+			config.WithRegion(appConfig.AWSRegion),
+			config.WithSharedConfigFiles(config.DefaultSharedConfigFiles),
+			config.WithSharedCredentialsFiles(config.DefaultSharedCredentialsFiles))
+	} else if appConfig.AWSRegion != "" {
+		log.Printf("Using AWS Region %v", appConfig.AWSRegion)
+		awsConfig, err = config.LoadDefaultConfig(context.Background(),
+			config.WithRegion(appConfig.AWSRegion))
+	} else {
+		log.Printf("Using default aws config")
+		awsConfig, err = config.LoadDefaultConfig(context.Background())
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	elbClient := elbv2.NewFromConfig(awsConfig)
+
+	drainClient := &DrainDelayClient{
+		elbv2Client: elbClient,
+		k8sClient:   k8sClientSet,
+	}
+
+	return drainClient, nil
 }
 
 func buildConfigFromRequest(r *http.Request) (*DelayConfig, error) {

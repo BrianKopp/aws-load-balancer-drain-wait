@@ -10,6 +10,7 @@ IP address is no longer in a healthy state in any of those load balancers.
 ## TODOs
 
 * Figure out compatibility matrix.
+* IAM Permissions
 
 ## Requirements
 
@@ -52,9 +53,11 @@ Here the query parameters are:
 Kubernetes supports pre-stop hooks which allow injecting logic after the pod is
 marked as terminating, but before your container receives a SIGTERM.
 
-The AWS Load Balancer Controller watches for pods getting put in a Terminating
-state. When this happens, it makes a deregistration API call to the AWS
-ELB API. You can use this service to add a dynamic-timed delay *prior*
+The AWS Load Balancer Controller (separate from this repo) watches for
+pods getting put in a Terminating state. When this happens, the AWS Load Balancer Controller
+makes a deregistration API call to the AWS ELB v2 API.
+
+You can use the service in this repo to add a dynamic-timed delay *prior*
 to your application receiving a SIGTERM.
 
 Add the following pre-stop hook configuration.
