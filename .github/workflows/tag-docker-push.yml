@@ -1,0 +1,17 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags: [ 'v*.*.*' ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set output
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - name: Build the Docker image
+      env:
+        RELEASE_TAG: ${{ steps.vars.output.tag }}
+      run: docker build . --file Dockerfile -t briankopp/aws-load-balancer-drain-wait:$RELEASE_TAG
