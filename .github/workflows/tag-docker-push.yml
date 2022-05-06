@@ -13,4 +13,4 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3.0.0
       with:
-        tags: "{{ env.IMAGE_NAME }}"
+        tags: ${{ env.IMAGE_NAME }}
