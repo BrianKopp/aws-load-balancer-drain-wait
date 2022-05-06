@@ -11,7 +11,9 @@ jobs:
     - name: Set output
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - name: Test tag
+      run: echo "$RELEASE_TAG"
     - name: Build the Docker image
       env:
         RELEASE_TAG: ${{ steps.vars.output.tag }}
-      run: docker build . --file Dockerfile -t briankopp/aws-load-balancer-drain-wait:$RELEASE_TAG
+      run: docker build . --file Dockerfile -t "briankopp/aws-load-balancer-drain-wait:$RELEASE_TAG"
