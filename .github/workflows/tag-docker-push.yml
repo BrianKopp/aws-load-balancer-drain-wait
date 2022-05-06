@@ -9,8 +9,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set tag
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      run: echo "IMAGE_NAME=\"briankopp/aws-load-balancer-drain-wait:${GITHUB_REF#refs/*/}\"" >> $GITHUB_ENV
     - name: Build and push Docker image
-      run: docker build . --file Dockerfile -t "briankopp/aws-load-balancer-drain-wait:$RELEASE_VERSION"
-    - name: Push Docker image
-      run: docker push "briankopp/aws-load-balancer-drain-wait:$RELEASE_VERSION"
+      uses: docker/build-push-action@v3.0.0
+      with:
+        tags: "{{ env.IMAGE_NAME }}"
