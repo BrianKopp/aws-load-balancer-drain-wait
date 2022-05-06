@@ -14,5 +14,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Set tag
+      run: echo "IMAGE_NAME=\"briankopp/aws-load-balancer-drain-wait:$(date +%s)\"" >> $GITHUB_ENV
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag briankopp/aws-load-balancer-drain-wait:$(date +%s)
+      run: docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}
+    - name: Scan image
+      uses: anchore/scan-action@v3
+      with:
+        image: ${{ env.IMAGE_NAME }}
